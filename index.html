@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Post Studio — News post generator</title>
+<title>Aslpostcreator — Create News &amp; Poll Post Graphics</title>
+<meta name="description" content="Aslpostcreator: turn any news text into a ready-to-post graphic. Draft a headline, add or generate a photo, pick a template, and download a Facebook/Instagram-ready image in minutes — free, in your browser.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://aslpostcreator.example.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Aslpostcreator">
+<meta property="og:title" content="Aslpostcreator — Create News & Poll Post Graphics">
+<meta property="og:description" content="Turn any news text into a ready-to-post graphic: headline, photo, template, download — all in your browser.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Aslpostcreator — Create News & Poll Post Graphics">
+<meta name="twitter:description" content="Turn any news text into a ready-to-post graphic: headline, photo, template, download — all in your browser.">
 <style>
   :root{
     --bg:#0b0b0d;
@@ -162,7 +172,7 @@
 <header>
   <div class="logo">P</div>
   <div class="headwrap">
-    <h1>Post Studio</h1>
+    <h1>Aslpostcreator</h1>
     <p>News description → headline → image → post</p>
   </div>
   <button id="startOver">Start over</button>
@@ -211,7 +221,7 @@
               <option value="Polish">Polish</option>
               <option value="Italian">Italian</option>
             </select>
-            <button class="btn small" id="translateBtn" onclick="translateHeadline()">Translate ↗</button>
+            <button class="btn small" id="translateBtn" onclick="translateHeadline()">Translate</button>
           </div>
           <div class="hint" id="translateStatus" style="margin-bottom:0;"></div>
         </div>
@@ -346,6 +356,7 @@ const state = {
 
 const TEMPLATES = [
   {id:'poll', name:'Poll panel', sub:'Navy block + yellow line'},
+  {id:'polltri', name:'Poll (tricolor)', sub:'Navy block + tricolor'},
   {id:'debat', name:'Debate', sub:'Full bleed + red badge'},
   {id:'yellow', name:'Yellow frame', sub:'Left aligned + border'},
   {id:'kicker', name:'Kicker', sub:'Small label above headline'},
@@ -444,389 +455,4 @@ function renderHeadlineCards(){
 function selectHeadline(h, el){
   document.querySelectorAll('.hcard').forEach(c=>c.classList.remove('selected'));
   if(el) el.classList.add('selected');
-  h = ensureHighlight(h);
-  state.headline = h;
-  document.getElementById('manualHeadline').value = h;
-  markDone(2, truncate(h.replace(/\*\*/g,''), 28));
-  openNext(3);
-  markDone(3,'Add an image');
-  renderPreview();
-}
-function useManualHeadline(){
-  const v = document.getElementById('manualHeadline').value.trim();
-  if(!v) return;
-  selectHeadline(v, null);
-}
-function truncate(s,n){ return s.length>n ? s.slice(0,n)+'…' : s; }
-
-function translateHeadline(){
-  const src = (state.headline || document.getElementById('manualHeadline').value.trim());
-  const status = document.getElementById('translateStatus');
-  if(!src){ status.textContent = 'Pick or type a headline first.'; return; }
-  const lang = document.getElementById('translateLang').value;
-  const langCodes = {'English (Australia)':'en', 'French':'fr', 'Polish':'pl', 'Italian':'it'};
-  const tl = langCodes[lang] || 'en';
-  const plain = src.replace(/\*\*/g,'');
-  const url = `https://translate.google.com/?sl=auto&tl=${tl}&text=${encodeURIComponent(plain)}&op=translate`;
-  window.open(url, '_blank');
-  status.textContent = 'Opened Google Translate in a new tab — copy the translated headline, come back, and paste it into the field above, then tap "Use this headline".';
-}
-
-// ---------- STEP 3: picture ----------
-function handleUpload(evt){
-  const file = evt.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onerror = ()=>{
-    alert('Could not read that file — try a different photo (JPG or PNG).');
-  };
-  reader.onload = ()=>{
-    const img = new Image();
-    img.onerror = ()=>{
-      alert('That file could not be loaded as an image.');
-    };
-    img.onload = ()=>{
-      state.image = img;
-      state.imgLoaded = true;
-      document.getElementById('uploadLabel').innerHTML =
-        `<span class="fname">${file.name}</span><br>${img.naturalWidth} × ${img.naturalHeight} · click to replace`;
-      markDone(3, 'Image in place');
-      openNext(4);
-      renderPreview();
-      renderTemplateGrid();
-    };
-    img.src = reader.result; // data: URL — more reliable than blob: in sandboxed viewers
-  };
-  reader.readAsDataURL(file);
-}
-
-async function generatePhoto(){
-  const btn = document.getElementById('genPhotoBtn');
-  const styleTxt = document.getElementById('photoStyle').value;
-  const basePrompt = (state.headline || state.description || 'news photo').replace(/\*\*/g,'');
-  const prompt = `${basePrompt}, ${styleTxt}, no text, no watermark`;
-  btn.textContent = 'Generating…';
-  btn.disabled = true;
-  const seed = Math.floor(Math.random()*100000);
-  const w = state.size==='square' ? 768:768, h = state.size==='square'?768:1024;
-  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&nologo=true&seed=${seed}`;
-  const img = new Image();
-  img.crossOrigin = 'anonymous';
-  let settled = false;
-  const timeout = setTimeout(()=>{
-    if(settled) return;
-    settled = true;
-    btn.textContent = 'Generate photo';
-    btn.disabled = false;
-    alert('The image service didn\'t respond. This page needs an internet connection to generate photos — if you\'re viewing it inside an in-app preview, try downloading the file and opening it in your regular browser instead.');
-  }, 25000);
-  img.onload = ()=>{
-    if(settled) return;
-    settled = true;
-    clearTimeout(timeout);
-    state.image = img;
-    state.imgLoaded = true;
-    document.getElementById('uploadLabel').innerHTML =
-      `<span class="fname">Generated photo</span><br>${img.naturalWidth} × ${img.naturalHeight} · click to replace`;
-    btn.textContent = 'Generate another';
-    btn.disabled = false;
-    markDone(3, 'Generated photo');
-    openNext(4);
-    renderPreview();
-    renderTemplateGrid();
-  };
-  img.onerror = ()=>{
-    if(settled) return;
-    settled = true;
-    clearTimeout(timeout);
-    btn.textContent = 'Generate photo';
-    btn.disabled = false;
-    document.getElementById('genStatus').textContent = '';
-    alert('Could not generate a photo right now — try again or upload your own.');
-  };
-  img.src = url;
-}
-
-// ---------- STEP 4: templates ----------
-function renderTemplateGrid(){
-  const grid = document.getElementById('tmplGrid');
-  grid.innerHTML = '';
-  TEMPLATES.forEach(t=>{
-    const card = document.createElement('div');
-    card.className = 'tmpl-card' + (t.id===state.template ? ' selected':'');
-    const cv = document.createElement('canvas');
-    cv.width = 200; cv.height = state.size==='square'?200:267;
-    card.appendChild(cv);
-    const label = document.createElement('div');
-    label.className='tmpl-name';
-    label.innerHTML = `${t.name}<span>${t.sub}</span>`;
-    card.appendChild(label);
-    card.onclick = ()=>{ state.template = t.id; document.getElementById('sub4').textContent=t.name; renderTemplateGrid(); renderPreview(); };
-    grid.appendChild(card);
-    draw(cv.getContext('2d'), cv.width, cv.height, t.id, 1);
-  });
-}
-
-function onFontSizeChange(){
-  document.getElementById('fontSizeVal').textContent = document.getElementById('fontSizeRange').value + '%';
-  renderPreview();
-}
-
-function setSize(s){
-  state.size = s;
-  document.querySelectorAll('.size-card').forEach(c=>c.classList.toggle('selected', c.dataset.size===s));
-  document.getElementById('sub5').textContent = s==='square' ? '1:1' : '3:4';
-  renderTemplateGrid();
-  renderPreview();
-}
-
-// ---------- CANVAS RENDERING ----------
-function wrapLines(ctx, text, maxWidth){
-  const words = text.split(' ');
-  const lines = [];
-  let cur = '';
-  words.forEach(w=>{
-    const test = cur ? cur+' '+w : w;
-    if(ctx.measureText(test).width > maxWidth && cur){
-      lines.push(cur); cur = w;
-    } else { cur = test; }
-  });
-  if(cur) lines.push(cur);
-  return lines;
-}
-
-// draws headline text, supports **highlight** segments, returns total height used
-function drawHeadline(ctx, rawText, x, bottomY, maxWidth, fontSize, align, normalColor, hiColor, lineHeight){
-  const text = rawText || 'Your headline here';
-  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
-  // Build a flat token list with color info, then wrap by word
-  ctx.font = `800 ${fontSize}px Arial, sans-serif`;
-  const tokens = [];
-  parts.forEach(p=>{
-    const hi = p.startsWith('**') && p.endsWith('**');
-    const clean = hi ? p.slice(2,-2) : p;
-    clean.split(' ').forEach(w=>{ if(w) tokens.push({w, hi}); });
-  });
-  // wrap into lines respecting maxWidth
-  const lines = [];
-  let cur = [];
-  let curWidth = 0;
-  const spaceW = ctx.measureText(' ').width;
-  tokens.forEach(t=>{
-    const w = ctx.measureText(t.w).width;
-    if(curWidth + w + (cur.length?spaceW:0) > maxWidth && cur.length){
-      lines.push(cur); cur=[]; curWidth=0;
-    }
-    cur.push(t); curWidth += w + (cur.length>1?spaceW:0);
-  });
-  if(cur.length) lines.push(cur);
-
-  const totalH = lines.length * lineHeight;
-  let y = bottomY - totalH + lineHeight*0.78;
-  lines.forEach(line=>{
-    let lineWidth = 0;
-    line.forEach((t,i)=> lineWidth += ctx.measureText(t.w).width + (i>0?spaceW:0));
-    let startX = align==='center' ? x - lineWidth/2 : x;
-    let cx = startX;
-    line.forEach(t=>{
-      ctx.fillStyle = t.hi ? hiColor : normalColor;
-      ctx.fillText(t.w, cx, y);
-      cx += ctx.measureText(t.w).width + spaceW;
-    });
-    y += lineHeight;
-  });
-  return totalH;
-}
-
-function drawImageCover(ctx, img, x, y, w, h, zoomPct, panXPct, panYPct){
-  if(!img){
-    ctx.fillStyle = '#1c1c1f';
-    ctx.fillRect(x,y,w,h);
-    return;
-  }
-  const zoom = (zoomPct||100)/100;
-  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
-  const scale = Math.max(w/iw, h/ih) * zoom;
-  const dw = iw*scale, dh = ih*scale;
-  const maxOffX = Math.max(0,(dw-w)/2), maxOffY = Math.max(0,(dh-h)/2);
-  const offX = (panXPct||0)/100 * maxOffX;
-  const offY = (panYPct||0)/100 * maxOffY;
-  const dx = x + (w-dw)/2 - offX;
-  const dy = y + (h-dh)/2 - offY;
-  ctx.save();
-  ctx.beginPath();
-  ctx.rect(x,y,w,h);
-  ctx.clip();
-  ctx.drawImage(img, dx, dy, dw, dh);
-  ctx.restore();
-}
-
-function reactionPills(ctx, w, h, scale, order){
-  const showRow = document.getElementById('reactionRow')?.checked;
-  if(!showRow) return;
-  const emoji = document.getElementById('emojiToggle')?.checked;
-  const fs = 20*scale;
-  ctx.font = `800 ${fs}px Arial`;
-  ctx.textBaseline='middle';
-  const margin = Math.max(28*scale, w*0.06);
-  const y = h - Math.max(60*scale, h*0.10);
-  ctx.fillStyle = '#ffffff';
-  const left = order==='reversed' ? ((emoji?'👍 ':'') + 'NO') : ((emoji?'❤️ ':'') + 'YES');
-  const right = order==='reversed' ? ((emoji?'❤️ ':'') + 'YES') : ((emoji?'👍 ':'') + 'NO');
-  ctx.textAlign='left';
-  ctx.fillText(left, margin, y);
-  ctx.textAlign='right';
-  ctx.fillText(right, w-margin, y);
-}
-
-function drawBadgeTag(ctx, scale, dark, y, xMargin){
-  const badge = document.getElementById('badgeText')?.value.trim();
-  if(!badge) return 0;
-  ctx.font = `800 ${15*scale}px Arial`;
-  const bw = ctx.measureText(badge).width + 26*scale;
-  const bh = 30*scale;
-  const x = xMargin || 0;
-  ctx.fillStyle = dark ? 'rgba(0,0,0,0.55)' : '#f4c430';
-  ctx.fillRect(x, y, bw, bh);
-  ctx.fillStyle = dark ? '#f4c430' : '#1a1a1a';
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText(badge, x+bw/2, y+bh/2);
-  ctx.textAlign='left';
-  return bh; // height used, so callers can leave a gap above it
-}
-
-function draw(ctx, W, H, tmplOverride, scale){
-  scale = scale || 1;
-  const tmpl = tmplOverride || state.template;
-  ctx.clearRect(0,0,W,H);
-  const img = state.image;
-  const zoom = parseInt(document.getElementById('zoomRange')?.value || 100);
-  const panX = parseInt(document.getElementById('panX')?.value || 0);
-  const panY = parseInt(document.getElementById('panY')?.value || 0);
-  const headline = state.headline;
-  const fs = ((parseInt(document.getElementById('fontSizeRange')?.value) || 100)/100) * scale;
-  const m = Math.max(30*scale, W*0.06); // safe margin so text never sits at the crop-prone edge
-  const colMain = document.getElementById('textColorMain')?.value || '#ffffff';
-  const colHi = document.getElementById('textColorHi')?.value || '#f4c430';
-
-  if(tmpl==='poll'){
-    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
-    const blockH = H*0.30;
-    ctx.fillStyle = 'rgba(10,18,38,0.88)';
-    ctx.fillRect(0, H-blockH, W, blockH);
-    // yellow strip
-    const stripH = 6*scale;
-    ctx.fillStyle='#f4c430'; ctx.fillRect(0,H-blockH-stripH,W,stripH);
-    ctx.textAlign='left';
-    const bottomY1 = H-blockH+blockH*0.56;
-    const totalH1 = drawHeadline(ctx, headline, m, bottomY1, W-m*2, 33*fs, 'left', colMain, colHi, 38*fs);
-    drawBadgeTag(ctx, scale, true, bottomY1-totalH1-14*scale-30*scale, m);
-    reactionPills(ctx, W, H, scale);
-  }
-  else if(tmpl==='debat'){
-    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
-    const grad = ctx.createLinearGradient(0,H*0.45,0,H);
-    grad.addColorStop(0,'rgba(0,0,0,0)');
-    grad.addColorStop(1,'rgba(0,0,0,0.92)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,W,H);
-    ctx.textAlign='left';
-    const bottomY2 = H-Math.max(90*scale,H*0.16);
-    const totalH2 = drawHeadline(ctx, headline, m, bottomY2, W-m*2, 33*fs, 'left', colMain, colHi, 38*fs);
-    const badge2 = document.getElementById('badgeText')?.value || 'DEBATE';
-    if(badge2.trim()){
-      const by2 = bottomY2-totalH2-14*scale-30*scale;
-      ctx.font = `800 ${15*scale}px Arial`;
-      const bw = ctx.measureText(badge2).width + 26*scale;
-      ctx.fillStyle = '#e5384d';
-      ctx.fillRect(m, by2, bw, 30*scale);
-      ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
-      ctx.fillText(badge2, m+bw/2, by2+15*scale);
-      ctx.textAlign='left';
-    }
-    reactionPills(ctx, W, H, scale);
-  }
-  else if(tmpl==='yellow'){
-    const border = 6*scale;
-    drawImageCover(ctx, img, border,border,W-border*2,H-border*2, zoom,panX,panY);
-    const grad = ctx.createLinearGradient(0,H*0.42,0,H);
-    grad.addColorStop(0,'rgba(0,0,0,0)');
-    grad.addColorStop(1,'rgba(0,0,0,0.88)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,W,H);
-    ctx.textAlign='left';
-    const bottomY3 = H-Math.max(100*scale,H*0.17);
-    const totalH3 = drawHeadline(ctx, headline, m, bottomY3, W-m*2, 34*fs, 'left', colMain, colHi, 40*fs);
-    drawBadgeTag(ctx, scale, false, bottomY3-totalH3-14*scale-30*scale, m);
-    reactionPills(ctx, W, H, scale, 'reversed');
-    ctx.strokeStyle = '#f4c430';
-    ctx.lineWidth = border;
-    ctx.strokeRect(border/2,border/2,W-border,H-border);
-  }
-  else if(tmpl==='kicker'){
-    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
-    const grad = ctx.createLinearGradient(0,H*0.5,0,H);
-    grad.addColorStop(0,'rgba(0,0,0,0)');
-    grad.addColorStop(1,'rgba(0,0,0,0.88)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0,0,W,H);
-    ctx.textAlign='left';
-    const bottomY4 = H-Math.max(90*scale,H*0.16);
-    const totalH4 = drawHeadline(ctx, headline, m, bottomY4, W-m*2, 30*fs, 'left', colMain, colHi, 35*fs);
-    const badge4 = document.getElementById('badgeText')?.value.trim();
-    if(badge4){
-      ctx.font = `800 ${14*scale}px Arial`;
-      ctx.fillStyle = '#f4c430';
-      ctx.textBaseline='alphabetic';
-      ctx.fillText(badge4.toUpperCase(), m, bottomY4-totalH4-14*scale);
-    }
-    reactionPills(ctx, W, H, scale);
-  }
-  else if(tmpl==='blackbar'){
-    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
-    const blockH5 = H*0.30;
-    ctx.fillStyle = '#0a0a0a';
-    ctx.fillRect(0, H-blockH5, W, blockH5);
-    ctx.textAlign='left';
-    const bottomY5 = H-blockH5+blockH5*0.56;
-    const totalH5 = drawHeadline(ctx, headline, m, bottomY5, W-m*2, 33*fs, 'left', '#e5384d', '#ffffff', 38*fs);
-    drawBadgeTag(ctx, scale, true, bottomY5-totalH5-14*scale-30*scale, m);
-    reactionPills(ctx, W, H, scale);
-  }
-}
-
-function dims(){
-  return state.size==='square' ? {w:1080,h:1080} : {w:1080,h:1440};
-}
-
-function renderPreview(){
-  const {w,h} = dims();
-  const cv = document.getElementById('previewCanvas');
-  cv.width = w; cv.height = h;
-  draw(cv.getContext('2d'), w, h, state.template, 1);
-}
-
-function download(fmt){
-  const {w,h} = dims();
-  const exportW = w*2, exportH = h*2;
-  const cv = document.createElement('canvas');
-  cv.width = exportW; cv.height = exportH;
-  draw(cv.getContext('2d'), exportW, exportH, state.template, 2);
-  const mime = fmt==='jpg' ? 'image/jpeg' : 'image/png';
-  const a = document.createElement('a');
-  a.download = 'post.' + (fmt==='jpg'?'jpg':'png');
-  a.href = cv.toDataURL(mime, 0.92);
-  a.click();
-}
-
-document.getElementById('startOver').onclick = ()=>{
-  if(confirm('Start over? This clears everything.')) location.reload();
-};
-
-// init
-renderTemplateGrid();
-renderPreview();
-document.getElementById('badgeText').value = state.badgeText;
-</script>
-</body>
-</html>
+  h = ensureHighlight(
