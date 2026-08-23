@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aslpostcreator — Create News &amp; Poll Post Graphics</title>
+<meta name="description" content="Aslpostcreator: turn any news text into a ready-to-post graphic. Draft a headline, add or generate a photo, pick a template, and download a Facebook/Instagram-ready image in minutes — free, in your browser.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://aslpostcreator.example.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Aslpostcreator">
+<meta property="og:title" content="Aslpostcreator — Create News & Poll Post Graphics">
+<meta property="og:description" content="Turn any news text into a ready-to-post graphic: headline, photo, template, download — all in your browser.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Aslpostcreator — Create News & Poll Post Graphics">
+<meta name="twitter:description" content="Turn any news text into a ready-to-post graphic: headline, photo, template, download — all in your browser.">
+<style>
+  :root{
+    --bg:#0b0b0d;
+    --panel:#141416;
+    --panel2:#1b1b1e;
+    --line:#2a2a2e;
+    --text:#f2f2f0;
+    --muted:#8b8b90;
+    --yellow:#f4c430;
+    --yellow-dim:#caa227;
+    --red:#e5384d;
+    --navy:#12203e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  header{
+    display:flex;align-items:center;gap:12px;
+    padding:16px 20px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:var(--bg);z-index:10;
+  }
+  .logo{
+    width:34px;height:34px;border-radius:9px;background:var(--yellow);
+    color:#1a1a1a;font-weight:800;display:flex;align-items:center;justify-content:center;
+    font-size:18px;flex-shrink:0;
+  }
+  header h1{font-size:16px;margin:0;}
+  header p{margin:0;font-size:12.5px;color:var(--muted);}
+  .headwrap{flex:1;}
+  #startOver{
+    margin-left:auto;background:transparent;border:1px solid var(--line);
+    color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;
+  }
+  #startOver:hover{border-color:var(--yellow);}
+  main{
+    display:grid;grid-template-columns:1fr;gap:20px;
+    padding:18px;max-width:1300px;margin:0 auto;
+  }
+  @media(min-width:900px){
+    main{grid-template-columns:minmax(0,1fr) 420px;align-items:start;}
+  }
+  .steps{display:flex;flex-direction:column;gap:10px;}
+  .step{
+    background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  }
+  .step.active{border-color:var(--yellow-dim);}
+  .step-head{
+    display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer;user-select:none;
+  }
+  .num{
+    width:26px;height:26px;border-radius:7px;background:var(--yellow);color:#1a1a1a;
+    font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .num.done{background:#3d5a2e;color:#c9f2a8;}
+  .step-title{font-weight:700;font-size:15px;}
+  .step-sub{color:var(--muted);font-size:12.5px;margin-left:8px;font-weight:400;}
+  .chev{margin-left:auto;color:var(--muted);transition:transform .15s;}
+  .step.open .chev{transform:rotate(180deg);}
+  .step-body{
+    display:none;padding:0 18px 18px 18px;border-top:1px solid var(--line);
+  }
+  .step.open .step-body{display:block;padding-top:14px;}
+  textarea, input[type=text]{
+    width:100%;background:#0f0f11;border:1px solid var(--line);color:var(--text);
+    border-radius:9px;padding:12px;font-size:14px;font-family:inherit;resize:vertical;
+  }
+  textarea:focus, input[type=text]:focus{outline:none;border-color:var(--yellow-dim);}
+  .hint{color:var(--muted);font-size:12px;margin:8px 0;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+  .btn{
+    background:var(--yellow);color:#1a1a1a;border:none;padding:11px 18px;border-radius:9px;
+    font-weight:700;font-size:13.5px;cursor:pointer;
+  }
+  .btn:hover{background:#ffd651;}
+  .btn:disabled{opacity:.5;cursor:default;}
+  .btn.ghost{
+    background:transparent;border:1px solid var(--line);color:var(--text);font-weight:600;
+  }
+  .btn.ghost:hover{border-color:var(--yellow-dim);}
+  .btn.small{padding:8px 12px;font-size:12.5px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .chip{
+    border:1px solid var(--line);color:var(--muted);padding:6px 12px;border-radius:20px;font-size:12px;
+    cursor:pointer;background:transparent;
+  }
+  .chip:hover{border-color:var(--yellow-dim);color:var(--text);}
+  .headline-cards{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+  .hcard{
+    border:1px solid var(--line);border-radius:12px;padding:16px 18px;cursor:pointer;
+    background:#0f0f11;line-height:1.4;
+  }
+  .hcard:hover{border-color:var(--yellow-dim);}
+  .hcard.selected{border-color:var(--yellow);background:#1a1608;}
+  .hcard-tag{
+    color:var(--yellow);font-size:11px;font-weight:800;letter-spacing:.08em;
+    text-transform:uppercase;margin-bottom:8px;
+  }
+  .hcard-text{
+    color:var(--text);font-size:19px;font-weight:800;text-transform:uppercase;
+    letter-spacing:.01em;line-height:1.25;
+  }
+  .upload-box{
+    border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;cursor:pointer;
+    font-size:13px;color:var(--muted);
+  }
+  .upload-box:hover{border-color:var(--yellow-dim);}
+  .upload-box .fname{color:var(--text);font-weight:700;}
+  input[type=file]{display:none;}
+  .slider-row{margin-top:14px;}
+  .slider-row label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;}
+  input[type=range]{width:100%;accent-color:var(--yellow);}
+  .gen-box{border:1px solid var(--yellow-dim);border-radius:10px;padding:14px;margin-top:14px;}
+  .gen-box .row{align-items:center;}
+  select{
+    background:#0f0f11;color:var(--text);border:1px solid var(--line);border-radius:8px;
+    padding:9px 10px;font-size:12.5px;
+  }
+  .tmpl-grid{display:flex;gap:12px;overflow-x:auto;padding-bottom:6px;margin-top:6px;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity;}
+  .tmpl-card{
+    border:2px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;background:#0f0f11;
+    flex:0 0 150px;scroll-snap-align:start;
+  }
+  .tmpl-card.selected{border-color:var(--yellow);box-shadow:0 0 0 1px var(--yellow);}
+  .tmpl-card canvas{width:100%;display:block;}
+  .tmpl-name{padding:8px 10px;font-size:12px;font-weight:700;}
+  .tmpl-name span{display:block;font-weight:400;color:var(--muted);font-size:11px;}
+  .toggles{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12.5px;color:var(--muted);}
+  .toggles label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+  .size-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .size-card{
+    border:2px solid var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer;
+  }
+  .size-card.selected{border-color:var(--yellow);}
+  .size-shape{border:2px solid var(--muted);margin:0 auto 10px auto;}
+  .size-card .t{font-weight:700;font-size:13.5px;}
+  .size-card .d{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+  .preview-wrap{
+    position:sticky;top:80px;background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;padding:16px;
+  }
+  .preview-label{font-size:11px;letter-spacing:.06em;color:var(--muted);text-transform:uppercase;margin-bottom:10px;}
+  #previewCanvas{width:100%;border-radius:8px;background:#000;display:block;}
+  .dl-row{display:flex;gap:10px;margin-top:14px;}
+  .dl-row .btn{flex:1;}
+  .badge-input{margin-top:10px;}
+  .badge-input label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">P</div>
+  <div class="headwrap">
+    <h1>Aslpostcreator</h1>
+    <p>News description → headline → image → post</p>
+  </div>
+  <button id="startOver">Start over</button>
+</header>
+
+<main>
+  <div class="steps">
+
+    <!-- STEP 1 -->
+    <div class="step open" data-step="1">
+      <div class="step-head" onclick="toggleStep(1)">
+        <div class="num" id="num1">1</div>
+        <div><span class="step-title">News description</span><span class="step-sub" id="sub1">Optional</span></div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="hint">Paste the news text. Any language — headlines come back in the same one.</div>
+        <textarea id="newsDesc" rows="5" placeholder="e.g. The government is reviewing lifetime perks granted to former presidents: chauffeured car, police protection, staff, all state-funded..."></textarea>
+        <div class="row">
+          <button class="btn" onclick="generateHeadlines()">Write 4 headlines</button>
+          <button class="btn ghost" onclick="skipToManualHeadline()">Skip — I'll write my own</button>
+        </div>
+        <div class="hint" id="genStatus"></div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step" data-step="2">
+      <div class="step-head" onclick="toggleStep(2)">
+        <div class="num" id="num2">2</div>
+        <div><span class="step-title">Pick a headline</span><span class="step-sub" id="sub2">Not started</span></div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="step-body">
+        <div id="headlineCards" class="headline-cards"></div>
+        <div class="hint" style="margin-top:12px;">Or write your own. Wrap a phrase in **like this** to highlight it in yellow.</div>
+        <input type="text" id="manualHeadline" placeholder="Type a headline...">
+        <div class="row"><button class="btn small ghost" onclick="useManualHeadline()">Use this headline</button></div>
+
+        <div class="gen-box">
+          <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:8px;">Auto-translate headline</label>
+          <div class="row" style="margin-top:0;">
+            <select id="translateLang">
+              <option value="English (Australia)">English (Australia)</option>
+              <option value="French">French</option>
+              <option value="Polish">Polish</option>
+              <option value="Italian">Italian</option>
+            </select>
+            <button class="btn small" id="translateBtn" onclick="translateHeadline()">Translate</button>
+          </div>
+          <div class="hint" id="translateStatus" style="margin-bottom:0;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step" data-step="3">
+      <div class="step-head" onclick="toggleStep(3)">
+        <div class="num" id="num3">3</div>
+        <div><span class="step-title">The picture</span><span class="step-sub" id="sub3">Not started</span></div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+          <div id="uploadLabel">Click to upload a photo (JPG/PNG)</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*" onchange="handleUpload(event)">
+
+        <div class="gen-box">
+          <div class="hint" style="margin:0 0 8px 0;">Or generate a photo — free, no key</div>
+          <div class="row">
+            <button class="btn small" id="genPhotoBtn" onclick="generatePhoto()">Generate photo</button>
+            <select id="photoStyle">
+              <option value="realistic photo, photojournalism style">Realistic photo</option>
+              <option value="dramatic cinematic photo">Cinematic photo</option>
+              <option value="illustration, editorial art">Illustration</option>
+            </select>
+          </div>
+          <div class="hint">Runs on Pollinations, a free public image service. 10–30s, can be busy at times.</div>
+        </div>
+
+        <div class="slider-row">
+          <label>Zoom</label>
+          <input type="range" id="zoomRange" min="100" max="250" value="100" oninput="renderPreview()">
+        </div>
+        <div class="slider-row">
+          <label>Left · right</label>
+          <input type="range" id="panX" min="-100" max="100" value="0" oninput="renderPreview()">
+        </div>
+        <div class="slider-row">
+          <label>Up · down</label>
+          <input type="range" id="panY" min="-100" max="100" value="0" oninput="renderPreview()">
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step" data-step="4">
+      <div class="step-head" onclick="toggleStep(4)">
+        <div class="num" id="num4">4</div>
+        <div><span class="step-title">Template</span><span class="step-sub" id="sub4">Poll panel</span></div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="tmpl-grid" id="tmplGrid"></div>
+        <div class="toggles">
+          <label><input type="checkbox" id="reactionRow" checked onchange="renderPreview()"> Reaction row</label>
+          <label><input type="checkbox" id="emojiToggle" checked onchange="renderPreview()"> Emoji instead of badge</label>
+        </div>
+        <div class="badge-input">
+          <label>Badge text — appears as a small tag on every template</label>
+          <input type="text" id="badgeText" value="DEBATE" oninput="renderPreview()">
+        </div>
+        <div class="slider-row">
+          <label>Headline text size — <span id="fontSizeVal">100%</span></label>
+          <input type="range" id="fontSizeRange" min="50" max="180" value="100" oninput="onFontSizeChange()">
+        </div>
+        <div class="row" style="align-items:center;margin-top:14px;">
+          <div>
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:5px;">Main text color</label>
+            <input type="color" id="textColorMain" value="#ffffff" oninput="renderPreview()" style="width:52px;height:36px;border:1px solid var(--line);border-radius:8px;background:none;padding:2px;">
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;color:var(--muted);margin-bottom:5px;">Highlight color</label>
+            <input type="color" id="textColorHi" value="#f4c430" oninput="renderPreview()" style="width:52px;height:36px;border:1px solid var(--line);border-radius:8px;background:none;padding:2px;">
+          </div>
+        </div>
+        <div class="hint">Highlight color applies to any part of the headline wrapped in **like this**.</div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step" data-step="5">
+      <div class="step-head" onclick="toggleStep(5)">
+        <div class="num" id="num5">5</div>
+        <div><span class="step-title">Size</span><span class="step-sub" id="sub5">3:4</span></div>
+        <div class="chev">▾</div>
+      </div>
+      <div class="step-body">
+        <div class="size-grid">
+          <div class="size-card" data-size="square" onclick="setSize('square')">
+            <div class="size-shape" style="width:60px;height:60px;"></div>
+            <div class="t">1:1 square</div>
+            <div class="d">1080 × 1080 · exports 2160</div>
+          </div>
+          <div class="size-card selected" data-size="portrait" onclick="setSize('portrait')">
+            <div class="size-shape" style="width:52px;height:69px;"></div>
+            <div class="t">3:4 portrait</div>
+            <div class="d">1080 × 1440 · exports 2160×2880</div>
+          </div>
+        </div>
+        <div class="hint">Portrait takes more room in the feed. Square is safer if the caption matters more than the picture.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="preview-wrap">
+    <div class="preview-label">Preview</div>
+    <canvas id="previewCanvas"></canvas>
+    <div class="dl-row">
+      <button class="btn" onclick="download('png')">Download PNG</button>
+      <button class="btn ghost" onclick="download('jpg')">JPG</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const state = {
+  description:'',
+  headlines:[],
+  headline:'',
+  image:null,
+  imgLoaded:false,
+  template:'poll',
+  reactionRow:true,
+  emojiToggle:true,
+  badgeText:'DEBATE',
+  size:'portrait'
+};
+
+const TEMPLATES = [
+  {id:'poll', name:'Poll panel', sub:'Navy block + yellow line'},
+  {id:'polltri', name:'Poll (tricolor)', sub:'Navy block + tricolor'},
+  {id:'debat', name:'Debate', sub:'Full bleed + red badge'},
+  {id:'yellow', name:'Yellow frame', sub:'Left aligned + border'},
+  {id:'kicker', name:'Kicker', sub:'Small label above headline'},
+  {id:'blackbar', name:'Black bar', sub:'Solid black + red text'}
+];
+
+function toggleStep(n){
+  document.querySelectorAll('.step').forEach(s=>{
+    if(parseInt(s.dataset.step)===n){ s.classList.toggle('open'); }
+    else { s.classList.remove('open'); }
+  });
+}
+function markDone(n, label){
+  document.getElementById('num'+n).classList.add('done');
+  document.getElementById('sub'+n).textContent = label;
+}
+function openNext(n){
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('open'));
+  const el = document.querySelector('.step[data-step="'+n+'"]');
+  if(el) el.classList.add('open');
+}
+
+// ---------- STEP 1: headline generation ----------
+function generateHeadlines(){
+  const desc = document.getElementById('newsDesc').value.trim();
+  state.description = desc;
+  const status = document.getElementById('genStatus');
+  if(!desc){ status.textContent = 'Paste some news text first.'; return; }
+  state.headlines = buildLocalHeadlines(desc);
+  status.textContent = 'Drafted from your own text, no model involved. Read them properly and edit below before posting.';
+  renderHeadlineCards();
+  markDone(1, 'Drafted locally');
+  openNext(2);
+  markDone(2, 'Choose one below');
+}
+
+function extractTopic(desc){
+  const clean = desc.replace(/\s+/g,' ').trim();
+  let sentence = (clean.match(/^.*?[.!?](?=\s|$)/) || [clean])[0];
+  sentence = sentence.replace(/[.!?]+$/,'').trim();
+  const words = sentence.split(' ');
+  if(words.length > 16) sentence = words.slice(0,16).join(' ');
+  return sentence;
+}
+
+function buildLocalHeadlines(desc){
+  const topic = extractTopic(desc);
+  const cap = topic.charAt(0).toUpperCase() + topic.slice(1);
+  const lower = topic.charAt(0).toLowerCase() + topic.slice(1);
+  return [
+    {tag:'Question', text: `${cap} — do you agree?`},
+    {tag:'Provocation', text: `${cap}. And nobody says a word?`},
+    {tag:'Conversational', text: `They are finally asking us: ${lower}?`},
+    {tag:'Wry', text: `${cap}. Who could have guessed.`}
+  ];
+}
+
+function ensureHighlight(line){
+  if(line.includes('**')) return line;
+  const words = line.replace(/[?!.]+$/,'').split(' ').filter(Boolean);
+  if(words.length < 3) return line;
+  // pick a short chunk from the back half of the headline — usually the punchiest part
+  const start = Math.max(1, Math.floor(words.length*0.45));
+  const len = Math.min(3, words.length-start-1) || 1;
+  const before = words.slice(0,start).join(' ');
+  const chunk = words.slice(start, start+len).join(' ');
+  const after = words.slice(start+len).join(' ');
+  return [before, `**${chunk}**`, after].filter(Boolean).join(' ');
+}
+
+function skipToManualHeadline(){
+  markDone(1, 'Skipped');
+  openNext(2);
+  markDone(2, 'Write your own');
+  document.getElementById('manualHeadline').focus();
+}
+
+function renderHeadlineCards(){
+  const wrap = document.getElementById('headlineCards');
+  wrap.innerHTML = '';
+  state.headlines.forEach(item=>{
+    const div = document.createElement('div');
+    div.className = 'hcard';
+    const tagEl = document.createElement('div');
+    tagEl.className = 'hcard-tag';
+    tagEl.textContent = item.tag;
+    const textEl = document.createElement('div');
+    textEl.className = 'hcard-text';
+    textEl.textContent = item.text;
+    div.appendChild(tagEl);
+    div.appendChild(textEl);
+    div.onclick = ()=>selectHeadline(item.text, div);
+    wrap.appendChild(div);
+  });
+}
+function selectHeadline(h, el){
+  document.querySelectorAll('.hcard').forEach(c=>c.classList.remove('selected'));
+  if(el) el.classList.add('selected');
+  h = ensureHighlight(h);
+  state.headline = h;
+  document.getElementById('manualHeadline').value = h;
+  markDone(2, truncate(h.replace(/\*\*/g,''), 28));
+  openNext(3);
+  markDone(3,'Add an image');
+  renderPreview();
+}
+function useManualHeadline(){
+  const v = document.getElementById('manualHeadline').value.trim();
+  if(!v) return;
+  selectHeadline(v, null);
+}
+function truncate(s,n){ return s.length>n ? s.slice(0,n)+'…' : s; }
+
+async function translateHeadline(){
+  const src = (state.headline || document.getElementById('manualHeadline').value.trim()).replace(/\*\*/g,'');
+  const status = document.getElementById('translateStatus');
+  if(!src){ status.textContent = 'Pick or type a headline first.'; return; }
+  const lang = document.getElementById('translateLang').value;
+  const langCodes = {'English (Australia)':'en', 'French':'fr', 'Polish':'pl', 'Italian':'it'};
+  const tl = langCodes[lang] || 'en';
+  if(tl === 'en'){ selectHeadline(src, null); status.textContent = ''; return; }
+  const btn = document.getElementById('translateBtn');
+  btn.disabled = true;
+  status.textContent = 'Translating…';
+  const controller = new AbortController();
+  const timeout = setTimeout(()=>controller.abort(), 15000);
+  try{
+    const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(src)}&langpair=en|${tl}`;
+    const res = await fetch(url, {signal: controller.signal});
+    clearTimeout(timeout);
+    if(!res.ok) throw new Error('bad response: ' + res.status);
+    const data = await res.json();
+    let txt = data && data.responseData && data.responseData.translatedText;
+    if(!txt) throw new Error('empty');
+    txt = txt.trim();
+    selectHeadline(txt, null);
+    status.textContent = '';
+  }catch(e){
+    clearTimeout(timeout);
+    console.error('translate failed:', e);
+    status.textContent = e.name === 'AbortError'
+      ? 'Timed out — the translation service is busy, try again.'
+      : 'Could not translate right now. Check your internet connection and try again.';
+  }
+  btn.disabled = false;
+}
+
+// ---------- STEP 3: picture ----------
+function handleUpload(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onerror = ()=>{
+    alert('Could not read that file — try a different photo (JPG or PNG).');
+  };
+  reader.onload = ()=>{
+    const img = new Image();
+    img.onerror = ()=>{
+      alert('That file could not be loaded as an image.');
+    };
+    img.onload = ()=>{
+      state.image = img;
+      state.imgLoaded = true;
+      document.getElementById('uploadLabel').innerHTML =
+        `<span class="fname">${file.name}</span><br>${img.naturalWidth} × ${img.naturalHeight} · click to replace`;
+      markDone(3, 'Image in place');
+      openNext(4);
+      renderPreview();
+      renderTemplateGrid();
+    };
+    img.src = reader.result; // data: URL — more reliable than blob: in sandboxed viewers
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generatePhoto(){
+  const btn = document.getElementById('genPhotoBtn');
+  const styleTxt = document.getElementById('photoStyle').value;
+  const basePrompt = (state.headline || state.description || 'news photo').replace(/\*\*/g,'');
+  const prompt = `${basePrompt}, ${styleTxt}, no text, no watermark`;
+  btn.textContent = 'Generating…';
+  btn.disabled = true;
+  const seed = Math.floor(Math.random()*100000);
+  const w = state.size==='square' ? 768:768, h = state.size==='square'?768:1024;
+  const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=${w}&height=${h}&nologo=true&seed=${seed}`;
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  let settled = false;
+  const timeout = setTimeout(()=>{
+    if(settled) return;
+    settled = true;
+    btn.textContent = 'Generate photo';
+    btn.disabled = false;
+    alert('The image service didn\'t respond. This page needs an internet connection to generate photos — if you\'re viewing it inside an in-app preview, try downloading the file and opening it in your regular browser instead.');
+  }, 25000);
+  img.onload = ()=>{
+    if(settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    state.image = img;
+    state.imgLoaded = true;
+    document.getElementById('uploadLabel').innerHTML =
+      `<span class="fname">Generated photo</span><br>${img.naturalWidth} × ${img.naturalHeight} · click to replace`;
+    btn.textContent = 'Generate another';
+    btn.disabled = false;
+    markDone(3, 'Generated photo');
+    openNext(4);
+    renderPreview();
+    renderTemplateGrid();
+  };
+  img.onerror = ()=>{
+    if(settled) return;
+    settled = true;
+    clearTimeout(timeout);
+    btn.textContent = 'Generate photo';
+    btn.disabled = false;
+    document.getElementById('genStatus').textContent = '';
+    alert('Could not generate a photo right now — try again or upload your own.');
+  };
+  img.src = url;
+}
+
+// ---------- STEP 4: templates ----------
+function renderTemplateGrid(){
+  const grid = document.getElementById('tmplGrid');
+  grid.innerHTML = '';
+  TEMPLATES.forEach(t=>{
+    const card = document.createElement('div');
+    card.className = 'tmpl-card' + (t.id===state.template ? ' selected':'');
+    const cv = document.createElement('canvas');
+    cv.width = 200; cv.height = state.size==='square'?200:267;
+    card.appendChild(cv);
+    const label = document.createElement('div');
+    label.className='tmpl-name';
+    label.innerHTML = `${t.name}<span>${t.sub}</span>`;
+    card.appendChild(label);
+    card.onclick = ()=>{ state.template = t.id; document.getElementById('sub4').textContent=t.name; renderTemplateGrid(); renderPreview(); };
+    grid.appendChild(card);
+    draw(cv.getContext('2d'), cv.width, cv.height, t.id, 1);
+  });
+}
+
+function onFontSizeChange(){
+  document.getElementById('fontSizeVal').textContent = document.getElementById('fontSizeRange').value + '%';
+  renderPreview();
+}
+
+function setSize(s){
+  state.size = s;
+  document.querySelectorAll('.size-card').forEach(c=>c.classList.toggle('selected', c.dataset.size===s));
+  document.getElementById('sub5').textContent = s==='square' ? '1:1' : '3:4';
+  renderTemplateGrid();
+  renderPreview();
+}
+
+// ---------- CANVAS RENDERING ----------
+function wrapLines(ctx, text, maxWidth){
+  const words = text.split(' ');
+  const lines = [];
+  let cur = '';
+  words.forEach(w=>{
+    const test = cur ? cur+' '+w : w;
+    if(ctx.measureText(test).width > maxWidth && cur){
+      lines.push(cur); cur = w;
+    } else { cur = test; }
+  });
+  if(cur) lines.push(cur);
+  return lines;
+}
+
+// draws headline text, supports **highlight** segments, returns total height used
+// Measures how tall a headline will render without drawing it — used to size
+// dark overlays/blocks BEFORE the text is painted, so long headlines never
+// stick out above the darkened area.
+function measureHeadlineHeight(ctx, rawText, fontSize, maxWidth, lineHeight){
+  const text = rawText || 'Your headline here';
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+  ctx.font = `800 ${fontSize}px Arial, sans-serif`;
+  const tokens = [];
+  parts.forEach(p=>{
+    const clean = (p.startsWith('**') && p.endsWith('**')) ? p.slice(2,-2) : p;
+    clean.split(' ').forEach(w=>{ if(w) tokens.push(w); });
+  });
+  const lines = [];
+  let cur = [];
+  let curWidth = 0;
+  const spaceW = ctx.measureText(' ').width;
+  tokens.forEach(w=>{
+    const ww = ctx.measureText(w).width;
+    if(curWidth + ww + (cur.length?spaceW:0) > maxWidth && cur.length){
+      lines.push(cur); cur=[]; curWidth=0;
+    }
+    cur.push(w); curWidth += ww + (cur.length>1?spaceW:0);
+  });
+  if(cur.length) lines.push(cur);
+  return Math.max(1,lines.length) * lineHeight;
+}
+
+function drawHeadline(ctx, rawText, x, bottomY, maxWidth, fontSize, align, normalColor, hiColor, lineHeight){
+  const text = rawText || 'Your headline here';
+  const parts = text.split(/(\*\*[^*]+\*\*)/g).filter(Boolean);
+  // Build a flat token list with color info, then wrap by word
+  ctx.font = `800 ${fontSize}px Arial, sans-serif`;
+  const tokens = [];
+  parts.forEach(p=>{
+    const hi = p.startsWith('**') && p.endsWith('**');
+    const clean = hi ? p.slice(2,-2) : p;
+    clean.split(' ').forEach(w=>{ if(w) tokens.push({w, hi}); });
+  });
+  // wrap into lines respecting maxWidth
+  const lines = [];
+  let cur = [];
+  let curWidth = 0;
+  const spaceW = ctx.measureText(' ').width;
+  tokens.forEach(t=>{
+    const w = ctx.measureText(t.w).width;
+    if(curWidth + w + (cur.length?spaceW:0) > maxWidth && cur.length){
+      lines.push(cur); cur=[]; curWidth=0;
+    }
+    cur.push(t); curWidth += w + (cur.length>1?spaceW:0);
+  });
+  if(cur.length) lines.push(cur);
+
+  const totalH = lines.length * lineHeight;
+  let y = bottomY - totalH + lineHeight*0.78;
+  lines.forEach(line=>{
+    let lineWidth = 0;
+    line.forEach((t,i)=> lineWidth += ctx.measureText(t.w).width + (i>0?spaceW:0));
+    let startX = align==='center' ? x - lineWidth/2 : x;
+    let cx = startX;
+    line.forEach(t=>{
+      ctx.fillStyle = t.hi ? hiColor : normalColor;
+      ctx.fillText(t.w, cx, y);
+      cx += ctx.measureText(t.w).width + spaceW;
+    });
+    y += lineHeight;
+  });
+  return totalH;
+}
+
+function drawImageCover(ctx, img, x, y, w, h, zoomPct, panXPct, panYPct){
+  if(!img){
+    ctx.fillStyle = '#1c1c1f';
+    ctx.fillRect(x,y,w,h);
+    return;
+  }
+  const zoom = (zoomPct||100)/100;
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const scale = Math.max(w/iw, h/ih) * zoom;
+  const dw = iw*scale, dh = ih*scale;
+  const maxOffX = Math.max(0,(dw-w)/2), maxOffY = Math.max(0,(dh-h)/2);
+  const offX = (panXPct||0)/100 * maxOffX;
+  const offY = (panYPct||0)/100 * maxOffY;
+  const dx = x + (w-dw)/2 - offX;
+  const dy = y + (h-dh)/2 - offY;
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x,y,w,h);
+  ctx.clip();
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.restore();
+}
+
+function reactionPills(ctx, w, h, scale, order){
+  const showRow = document.getElementById('reactionRow')?.checked;
+  if(!showRow) return;
+  const emoji = document.getElementById('emojiToggle')?.checked;
+  const fs = 20*scale;
+  ctx.font = `800 ${fs}px Arial`;
+  ctx.textBaseline='middle';
+  const y = h - Math.max(60*scale, h*0.10);
+  const gap = 26*scale;
+  const left = order==='reversed' ? ((emoji?'👍 ':'') + 'NO') : ((emoji?'❤️ ':'') + 'YES');
+  const right = order==='reversed' ? ((emoji?'❤️ ':'') + 'YES') : ((emoji?'👍 ':'') + 'NO');
+  const leftW = ctx.measureText(left).width;
+  const rightW = ctx.measureText(right).width;
+  const dividerW = 2*scale;
+  const totalW = leftW + gap + dividerW + gap + rightW;
+  let x = (w - totalW)/2;
+  ctx.fillStyle = '#ffffff';
+  ctx.textAlign='left';
+  ctx.fillText(left, x, y);
+  x += leftW + gap;
+  ctx.globalAlpha = 0.5;
+  ctx.fillRect(x, y-10*scale, dividerW, 20*scale);
+  ctx.globalAlpha = 1;
+  x += dividerW + gap;
+  ctx.fillText(right, x, y);
+}
+
+function drawBadgeTag(ctx, scale, dark, y, xMargin){
+  const badge = document.getElementById('badgeText')?.value.trim();
+  if(!badge) return 0;
+  ctx.font = `800 ${20*scale}px Arial`;
+  const bw = ctx.measureText(badge).width + 34*scale;
+  const bh = 40*scale;
+  const x = xMargin || 0;
+  ctx.fillStyle = dark ? 'rgba(0,0,0,0.55)' : '#f4c430';
+  ctx.fillRect(x, y, bw, bh);
+  ctx.fillStyle = dark ? '#f4c430' : '#1a1a1a';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(badge, x+bw/2, y+bh/2);
+  ctx.textAlign='left';
+  return bh; // height used, so callers can leave a gap above it
+}
+
+function draw(ctx, W, H, tmplOverride, scale){
+  scale = scale || 1;
+  const tmpl = tmplOverride || state.template;
+  ctx.clearRect(0,0,W,H);
+  const img = state.image;
+  const zoom = parseInt(document.getElementById('zoomRange')?.value || 100);
+  const panX = parseInt(document.getElementById('panX')?.value || 0);
+  const panY = parseInt(document.getElementById('panY')?.value || 0);
+  const headline = state.headline;
+  const fs = ((parseInt(document.getElementById('fontSizeRange')?.value) || 100)/100) * scale;
+  const m = Math.max(30*scale, W*0.06); // safe margin so text never sits at the crop-prone edge
+  const colMain = document.getElementById('textColorMain')?.value || '#ffffff';
+  const colHi = document.getElementById('textColorHi')?.value || '#f4c430';
+
+  if(tmpl==='poll'){
+    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
+    const bottomPad1 = Math.max(70*scale, H*0.12);
+    const preH1 = measureHeadlineHeight(ctx, headline, 33*fs, W-m*2, 38*fs);
+    const blockH = Math.max(H*0.30, preH1 + 74*scale + bottomPad1);
+    ctx.fillStyle = 'rgba(10,18,38,0.88)';
+    ctx.fillRect(0, H-blockH, W, blockH);
+    // yellow strip
+    const stripH = 6*scale;
+    ctx.fillStyle='#f4c430'; ctx.fillRect(0,H-blockH-stripH,W,stripH);
+    ctx.textAlign='left';
+    const bottomY1 = H-bottomPad1;
+    const totalH1 = drawHeadline(ctx, headline, m, bottomY1, W-m*2, 33*fs, 'left', colMain, colHi, 38*fs);
+    drawBadgeTag(ctx, scale, true, bottomY1-totalH1-14*scale-40*scale, m);
+    reactionPills(ctx, W, H, scale);
+  }
+  else if(tmpl==='polltri'){
+    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
+    const bottomPadt = Math.max(70*scale, H*0.12);
+    const preHt = measureHeadlineHeight(ctx, headline, 33*fs, W-m*2, 38*fs);
+    const blockHt = Math.max(H*0.30, preHt + 74*scale + bottomPadt);
+    ctx.fillStyle = 'rgba(10,18,38,0.88)';
+    ctx.fillRect(0, H-blockHt, W, blockHt);
+    // tricolor strip
+    const stripHt = 6*scale;
+    ctx.fillStyle='#1b3fa0'; ctx.fillRect(0,H-blockHt-stripHt,W/3,stripHt);
+    ctx.fillStyle='#f2f2f2'; ctx.fillRect(W/3,H-blockHt-stripHt,W/3,stripHt);
+    ctx.fillStyle='#e5384d'; ctx.fillRect(2*W/3,H-blockHt-stripHt,W/3,stripHt);
+    ctx.textAlign='left';
+    const bottomYt = H-bottomPadt;
+    const totalHt = drawHeadline(ctx, headline, m, bottomYt, W-m*2, 33*fs, 'left', colMain, colHi, 38*fs);
+    drawBadgeTag(ctx, scale, true, bottomYt-totalHt-14*scale-40*scale, m);
+    reactionPills(ctx, W, H, scale);
+  }
+  else if(tmpl==='debat'){
+    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
+    const bottomY2 = H-Math.max(90*scale,H*0.16);
+    const preH2 = measureHeadlineHeight(ctx, headline, 33*fs, W-m*2, 38*fs);
+    const gradTop2 = Math.max(H*0.08, Math.min(H*0.45, bottomY2 - preH2 - 74*scale));
+    const grad = ctx.createLinearGradient(0,gradTop2,0,H);
+    grad.addColorStop(0,'rgba(0,0,0,0)');
+    grad.addColorStop(1,'rgba(0,0,0,0.92)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+    ctx.textAlign='left';
+    const totalH2 = drawHeadline(ctx, headline, m, bottomY2, W-m*2, 33*fs, 'left', colMain, colHi, 38*fs);
+    const badge2 = document.getElementById('badgeText')?.value || 'DEBATE';
+    if(badge2.trim()){
+      const by2 = bottomY2-totalH2-14*scale-40*scale;
+      ctx.font = `800 ${20*scale}px Arial`;
+      const bw = ctx.measureText(badge2).width + 34*scale;
+      ctx.fillStyle = '#e5384d';
+      ctx.fillRect(m, by2, bw, 40*scale);
+      ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(badge2, m+bw/2, by2+20*scale);
+      ctx.textAlign='left';
+    }
+    reactionPills(ctx, W, H, scale);
+  }
+  else if(tmpl==='yellow'){
+    const border = 6*scale;
+    drawImageCover(ctx, img, border,border,W-border*2,H-border*2, zoom,panX,panY);
+    const bottomY3 = H-Math.max(100*scale,H*0.17);
+    const preH3 = measureHeadlineHeight(ctx, headline, 34*fs, W-m*2, 40*fs);
+    const gradTop3 = Math.max(H*0.08, Math.min(H*0.42, bottomY3 - preH3 - 74*scale));
+    const grad = ctx.createLinearGradient(0,gradTop3,0,H);
+    grad.addColorStop(0,'rgba(0,0,0,0)');
+    grad.addColorStop(1,'rgba(0,0,0,0.88)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+    ctx.textAlign='left';
+    const totalH3 = drawHeadline(ctx, headline, m, bottomY3, W-m*2, 34*fs, 'left', colMain, colHi, 40*fs);
+    drawBadgeTag(ctx, scale, false, bottomY3-totalH3-14*scale-40*scale, m);
+    reactionPills(ctx, W, H, scale, 'reversed');
+    ctx.strokeStyle = '#f4c430';
+    ctx.lineWidth = border;
+    ctx.strokeRect(border/2,border/2,W-border,H-border);
+  }
+  else if(tmpl==='kicker'){
+    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
+    const bottomY4 = H-Math.max(90*scale,H*0.16);
+    const preH4 = measureHeadlineHeight(ctx, headline, 30*fs, W-m*2, 35*fs);
+    const gradTop4 = Math.max(H*0.08, Math.min(H*0.5, bottomY4 - preH4 - 120*scale));
+    const grad = ctx.createLinearGradient(0,gradTop4,0,H);
+    grad.addColorStop(0,'rgba(0,0,0,0)');
+    grad.addColorStop(1,'rgba(0,0,0,0.88)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,W,H);
+    ctx.textAlign='left';
+    const totalH4 = drawHeadline(ctx, headline, m, bottomY4, W-m*2, 30*fs, 'left', colMain, colHi, 35*fs);
+    const badge4 = document.getElementById('badgeText')?.value.trim();
+    if(badge4){
+      ctx.font = `800 ${19*scale}px Arial`;
+      ctx.fillStyle = '#f4c430';
+      ctx.textBaseline='alphabetic';
+      ctx.fillText(badge4.toUpperCase(), m, bottomY4-totalH4-18*scale);
+    }
+    reactionPills(ctx, W, H, scale);
+  }
+  else if(tmpl==='blackbar'){
+    drawImageCover(ctx, img, 0,0,W,H, zoom,panX,panY);
+    const bottomPad5 = Math.max(70*scale, H*0.12);
+    const preH5 = measureHeadlineHeight(ctx, headline, 33*fs, W-m*2, 38*fs);
+    const blockH5 = Math.max(H*0.30, preH5 + 74*scale + bottomPad5);
+    ctx.fillStyle = '#0a0a0a';
+    ctx.fillRect(0, H-blockH5, W, blockH5);
+    ctx.textAlign='left';
+    const bottomY5 = H-bottomPad5;
+    const totalH5 = drawHeadline(ctx, headline, m, bottomY5, W-m*2, 33*fs, 'left', '#e5384d', '#ffffff', 38*fs);
+    drawBadgeTag(ctx, scale, true, bottomY5-totalH5-14*scale-40*scale, m);
+    reactionPills(ctx, W, H, scale);
+  }
+}
+
+function dims(){
+  return state.size==='square' ? {w:1080,h:1080} : {w:1080,h:1440};
+}
+
+function renderPreview(){
+  const {w,h} = dims();
+  const cv = document.getElementById('previewCanvas');
+  cv.width = w; cv.height = h;
+  draw(cv.getContext('2d'), w, h, state.template, 1);
+}
+
+function download(fmt){
+  const {w,h} = dims();
+  const exportW = w*2, exportH = h*2;
+  const cv = document.createElement('canvas');
+  cv.width = exportW; cv.height = exportH;
+  draw(cv.getContext('2d'), exportW, exportH, state.template, 2);
+  const mime = fmt==='jpg' ? 'image/jpeg' : 'image/png';
+  const a = document.createElement('a');
+  a.download = 'post.' + (fmt==='jpg'?'jpg':'png');
+  a.href = cv.toDataURL(mime, 0.92);
+  a.click();
+}
+
+document.getElementById('startOver').onclick = ()=>{
+  if(confirm('Start over? This clears everything.')) location.reload();
+};
+
+// init
+renderTemplateGrid();
+renderPreview();
+document.getElementById('badgeText').value = state.badgeText;
+</script>
+</body>
+</html>
